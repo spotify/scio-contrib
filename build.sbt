@@ -17,6 +17,9 @@
 
 import sbt.Keys._
 
+val scioVersion = "0.5.6"
+val scalaMacrosVersion = "2.1.1"
+
 val commonSettings = Seq(
   organization := "com.spotify",
   name := "scio-contrib",
@@ -26,7 +29,11 @@ val commonSettings = Seq(
   scalacOptions ++= commonScalacOptions,
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
-  javacOptions in (Compile, doc) := Seq("-source", "1.8")
+  javacOptions in (Compile, doc) := Seq("-source", "1.8"),
+  libraryDependencies ++= Seq(
+    "com.spotify" %% "scio-core" % scioVersion,
+    "com.spotify" %% "scio-test" % scioVersion
+  )
 )
 
 val noPublishSettings = Seq(
@@ -35,10 +42,31 @@ val noPublishSettings = Seq(
   publishArtifact := false
 )
 
+lazy val paradiseDependency =
+  "org.scalamacros" % "paradise" % scalaMacrosVersion cross CrossVersion.full
+
+lazy val macroSettings = Seq(
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  addCompilerPlugin(paradiseDependency)
+)
+
+lazy val scioContribBigQuery: Project = Project(
+  "scio-contrib-biquery",
+  file("bigquery")
+).settings(
+  commonSettings ++ macroSettings,
+  description := "Contributions to Scio's BigQuery tap",
+  libraryDependencies ++= Seq(
+    "com.spotify" %% "scio-bigquery" % scioVersion,
+    "com.spotify" %% "scio-avro" % scioVersion
+  )
+)
+
 lazy val root: Project = project
   .in(file("."))
   .settings(commonSettings)
   .settings(noPublishSettings)
+  .aggregate(scioContribBigQuery)
 
 // sampled from https://tpolecat.github.io/2017/04/25/scalac-flags.html
 lazy val commonScalacOptions = Seq(
