@@ -1,5 +1,9 @@
-# scio-contrib
-Community-supported add-ons for [Scio](https://github.com/spotify/scio).
+scio-contrib
+===
+
+[![Build Status](https://api.travis-ci.org/spotify/scio-contrib.svg?branch=master)](https://travis-ci.org/spotify/scio-contrib)
+[![codecov.io](https://codecov.io/github/spotify/scio-contrib/coverage.svg?branch=master)](https://codecov.io/github/spotify/scio-contrib?branch=master)
+[![GitHub license](https://img.shields.io/github/license/spotify/scio-contrib.svg)](./LICENSE)
 
 # License
 
