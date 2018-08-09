@@ -34,42 +34,46 @@ import scala.reflect.ClassTag
 
 /** Provides implicit helpers for SCollections interacting with BigQuery. */
 object Implicits extends ToTableRow with ToTableSchema {
+
   case class AvroConversionException(
-      private val message: String,
-      private val cause: Throwable = null
-  ) extends Exception(message, cause)
+                                      private val message: String,
+                                      private val cause: Throwable = null
+                                    ) extends Exception(message, cause)
 
   implicit class AvroImplicits[T <: IndexedRecord](val self: SCollection[T]) {
 
     /**
-      * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
-      * automatically converting T's [[org.apache.avro.Schema AvroSchema]] to BigQuery's
-      * [[com.google.api.services.bigquery.model.TableSchema TableSchema]] and converting each
-      * [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
-      * [[com.spotify.scio.bigquery.TableRow TableRow]].
-      */
+     * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
+     * automatically converting T's [[org.apache.avro.Schema AvroSchema]] to BigQuery's
+     * [[com.google.api.services.bigquery.model.TableSchema TableSchema]] and converting each
+     * [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
+     * [[com.spotify.scio.bigquery.TableRow TableRow]].
+     */
     def saveAvroAsBigQuery(table: TableReference,
                            avroSchema: Schema = null,
                            writeDisposition: WriteDisposition = null,
                            createDisposition: CreateDisposition = null,
                            tableDescription: String = null)(
-        implicit c: ClassTag[T]): Future[Tap[TableRow]] = {
+                            implicit c: ClassTag[T]): Future[Tap[TableRow]] = {
       val schema: Schema = Option(avroSchema)
         .getOrElse {
           val cls = ScioUtil.classOf[T]
           if (classOf[IndexedRecord] isAssignableFrom cls) {
             cls.getMethod("getClassSchema").invoke(null).asInstanceOf[Schema]
-          } else { throw AvroConversionException("Could not invoke $SCHEMA on provided Avro type") }
+          } else {
+            throw AvroConversionException("Could not invoke $SCHEMA on provided Avro type")
+          }
         }
 
-      val bqSchema = toBigQuerySchema(schema)
+      val bqSchema = toTableSchema(schema)
       self
         .map(toTableRow)
         .saveAsBigQuery(table,
-                        bqSchema,
-                        writeDisposition,
-                        createDisposition,
-                        tableDescription)
+          bqSchema,
+          writeDisposition,
+          createDisposition,
+          tableDescription)
     }
   }
+
 }

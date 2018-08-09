@@ -29,9 +29,9 @@ import org.apache.avro.generic.{GenericFixed, IndexedRecord}
 import scala.collection.JavaConverters._
 
 /**
-  * Converts an [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
-  * [[com.spotify.scio.bigquery.TableRow TableRow]].
-  */
+ * Converts an [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
+ * [[com.spotify.scio.bigquery.TableRow TableRow]].
+ */
 trait ToTableRow {
   private lazy val encodingPropName: String = "bigquery.bytes.encoder"
   private lazy val base64Encoding: BaseEncoding = BaseEncoding.base64Url()
@@ -52,21 +52,22 @@ trait ToTableRow {
   // scalastyle:off cyclomatic.complexity
   private def toTableRowField(fieldValue: Any, field: Schema.Field): Any = {
     fieldValue match {
-      case x: CharSequence          => x.toString
-      case x: Enum[_]               => x.name()
-      case x: Number                => x
-      case x: Boolean               => x
-      case x: GenericFixed          => encodeByteArray(x.bytes(), field.schema())
-      case x: ByteBuffer            => encodeByteArray(toByteArray(x), field.schema())
-      case x: util.Map[_, _]        => toTableRowFromMap(x.asScala, field)
+      case x: CharSequence => x.toString
+      case x: Enum[_] => x.name()
+      case x: Number => x
+      case x: Boolean => x
+      case x: GenericFixed => encodeByteArray(x.bytes(), field.schema())
+      case x: ByteBuffer => encodeByteArray(toByteArray(x), field.schema())
+      case x: util.Map[_, _] => toTableRowFromMap(x.asScala, field)
       case x: java.lang.Iterable[_] => toTableRowFromIterable(x.asScala, field)
-      case x: IndexedRecord         => toTableRow(x)
+      case x: IndexedRecord => toTableRow(x)
       case _ =>
         throw AvroConversionException(
           s"ToTableRow conversion failed:" +
             s"could not match ${fieldValue.getClass}")
     }
   }
+
   // scalastyle:on cyclomatic.complexity
 
   private def toTableRowFromIterable(iterable: Iterable[Any],
@@ -101,7 +102,7 @@ trait ToTableRow {
                               fieldSchema: Schema): String = {
     Option(fieldSchema.getProp(encodingPropName)) match {
       case Some("BASE64") => base64Encoding.encode(bytes)
-      case Some("HEX")    => hexEncoding.encode(bytes)
+      case Some("HEX") => hexEncoding.encode(bytes)
       case Some(encoding) =>
         throw AvroConversionException(s"Unsupported encoding $encoding")
       case None => base64Encoding.encode(bytes)
@@ -117,4 +118,3 @@ trait ToTableRow {
   }
 }
 
-object ToTableRow extends ToTableRow

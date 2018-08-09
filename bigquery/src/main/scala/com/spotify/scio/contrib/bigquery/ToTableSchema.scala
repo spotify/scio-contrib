@@ -26,10 +26,10 @@ import org.apache.avro.Schema.Type._
 import scala.collection.JavaConverters._
 
 /**
-  * Converts a [[org.apache.avro.Schema Schema]] object into a
-  * [[com.google.api.services.bigquery.model.TableSchema]] TableSchema.
-  * All Avro primitive and complex types are supported.
-  */
+ * Converts a [[org.apache.avro.Schema Schema]] object into a
+ * [[com.google.api.services.bigquery.model.TableSchema]] TableSchema.
+ * All Avro primitive and complex types are supported.
+ */
 trait ToTableSchema {
   private lazy val avroToBQTypes: Map[Type, String] = Map(
     STRING -> "STRING",
@@ -48,12 +48,13 @@ trait ToTableSchema {
     (avroToBQTypes.keys ++ Seq(UNION, ARRAY, RECORD, MAP)).toSet
 
   /**
-    * Traverses all fields of the supplied avroSchema and converts it into
-    * a TableSchema containing TableFieldSchemas.
-    * @param avroSchema
-    * @return the equivalent BigQuery schema
-    */
-  def toBigQuerySchema(avroSchema: Schema): TableSchema = {
+   * Traverses all fields of the supplied avroSchema and converts it into
+   * a TableSchema containing TableFieldSchemas.
+   *
+   * @param avroSchema
+   * @return the equivalent BigQuery schema
+   */
+  def toTableSchema(avroSchema: Schema): TableSchema = {
     val fields = getFieldSchemas(avroSchema)
 
     new TableSchema().setFields(fields.asJava)
@@ -87,11 +88,11 @@ trait ToTableSchema {
     }
 
     schemaType match {
-      case UNION  => setFieldDataTypeFromUnion(field, schema)
-      case ARRAY  => setFieldDataTypeFromArray(field, schema)
+      case UNION => setFieldDataTypeFromUnion(field, schema)
+      case ARRAY => setFieldDataTypeFromArray(field, schema)
       case RECORD => field.setFields(getFieldSchemas(schema).asJava)
-      case MAP    => setFieldTypeFromMap(field, schema)
-      case _      =>
+      case MAP => setFieldTypeFromMap(field, schema)
+      case _ =>
     }
   }
 
@@ -148,4 +149,3 @@ trait ToTableSchema {
   }
 }
 
-object ToTableSchema extends ToTableSchema

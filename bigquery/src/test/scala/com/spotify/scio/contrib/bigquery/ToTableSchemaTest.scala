@@ -18,15 +18,14 @@
 package com.spotify.scio.contrib.bigquery
 
 import com.google.api.services.bigquery.model.{TableFieldSchema, TableSchema}
-import com.spotify.sciocontrib.bigquery.AvroExample
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
 
 class ToTableSchemaTest extends FlatSpec with Matchers with ToTableSchema {
 
-  "ToSchema" should "convert an Avro Schema to a BigQuery TableSchema" in {
-    toBigQuerySchema(AvroExample.SCHEMA$) shouldEqual
+  "toTableSchema" should "convert an Avro Schema to a BigQuery TableSchema" in {
+    toTableSchema(AvroExample.SCHEMA$) shouldEqual
       new TableSchema().setFields(List(
         new TableFieldSchema()
           .setName("intField")

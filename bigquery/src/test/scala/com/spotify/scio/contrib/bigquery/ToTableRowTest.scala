@@ -22,12 +22,6 @@ import java.nio.ByteBuffer
 import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import com.spotify.scio.bigquery.TableRow
-import com.spotify.sciocontrib.bigquery.{
-  AvroExample,
-  Kind,
-  NestedAvro,
-  fixedType
-}
 import org.apache.avro.generic.GenericData
 import org.scalatest.{FlatSpec, Matchers}
 
