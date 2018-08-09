@@ -1,5 +1,4 @@
-
-package com.spotify.sciocontrib
+package com.spotify.sciocontrib.bigquery
 
 import com.google.api.services.bigquery.model.{TableReference, TableSchema}
 import com.spotify.scio.bigquery.TableRow
@@ -12,25 +11,22 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.{CreateDisposition, 
 import scala.concurrent.Future
 
 
-package object bigquery extends ToTableRow with ToSchema {
+object Implicits extends ToTableRow with ToSchema {
   case class AvroConversionException(
-                                        private val message: String,
-                                        private val cause: Throwable = null
-                                      ) extends Exception(message, cause)
+                                      private val message: String,
+                                      private val cause: Throwable = null
+                                    ) extends Exception(message, cause)
 
   implicit class AvroImplicits[T <: IndexedRecord](val self: SCollection[T]) {
-    implicit val recordToTableRow: T => TableRow = toTableRow
-
-    def saveAsBigQuery(table: TableReference,
+    def saveAvroAsBigQuery(table: TableReference,
                        avroSchema: Schema,
                        writeDisposition: WriteDisposition,
                        createDisposition: CreateDisposition,
-                       tableDescription: String)
-                      (implicit t: T => TableRow): Future[Tap[TableRow]] = {
+                       tableDescription: String): Future[Tap[TableRow]] = {
       val bqSchema: TableSchema = toBigQuerySchema(avroSchema)
 
       self
-        .map(avroRecord => t.apply(avroRecord))
+        .map(toTableRow)
         .saveAsBigQuery(table, bqSchema, writeDisposition, createDisposition, tableDescription)
     }
   }

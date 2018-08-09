@@ -15,10 +15,12 @@
  * under the License.
  */
 
+import sbt._
 import sbt.Keys._
 
 val scioVersion = "0.5.6"
 val scalaMacrosVersion = "2.1.1"
+val avroVersion = "1.8.2"
 
 val commonSettings = Seq(
   organization := "com.spotify",
@@ -32,7 +34,8 @@ val commonSettings = Seq(
   javacOptions in (Compile, doc) := Seq("-source", "1.8"),
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-core" % scioVersion,
-    "com.spotify" %% "scio-test" % scioVersion
+    "com.spotify" %% "scio-test" % scioVersion,
+    "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.5.0"
   )
 )
 
@@ -54,12 +57,18 @@ lazy val scioContribBigQuery: Project = Project(
   "scio-contrib-biquery",
   file("bigquery")
 ).settings(
-  commonSettings ++ macroSettings,
+  commonSettings ++ macroSettings ++ noPublishSettings,
   description := "Contributions to Scio's BigQuery tap",
+  version in AvroConfig := avroVersion,
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-bigquery" % scioVersion,
     "com.spotify" %% "scio-avro" % scioVersion
-  )
+  ),
+  (sourceDirectory in AvroConfig) := baseDirectory.value / "src/test/avro/",
+  sourceDirectories in Compile := (sourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
+  managedSourceDirectories in Compile := (managedSourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
+  sources in doc in Compile := List(), // suppress warnings
+  compileOrder := CompileOrder.JavaThenScala
 )
 
 lazy val root: Project = project

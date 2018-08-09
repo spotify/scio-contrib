@@ -1,11 +1,15 @@
 package com.spotify.sciocontrib.bigquery
 
 import java.nio.ByteBuffer
+import java.util
 
 import com.google.common.io.BaseEncoding
 import com.spotify.scio.bigquery.TableRow
+import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericData, IndexedRecord}
+
+import scala.collection.JavaConverters._
 
 trait ToTableRow {
   private lazy val encodingPropName: String = "bigquery.bytes.encoder"
@@ -25,7 +29,7 @@ trait ToTableRow {
   }
 
   // scalastyle:off cyclomatic.complexity
-  private def toTableRowField[T](o: T, field: Schema.Field): Object = {
+  private def toTableRowField[T](o: T, field: Schema.Field): Any = {
     o match {
       case x: CharSequence => x.toString
       case x: Enum[_] => x.name()
@@ -39,8 +43,8 @@ trait ToTableRow {
           case Some(encoding) => throw AvroConversionException(s"Unsupported encoding $encoding")
           case None => base64Encoding.encode(toByteArray(x))
         }
-      case x: Iterable[_] => toTableRowFromIterable(x, field)
-      case x: Map[_, _] => toTableRowFromMap(x, field)
+      case x: util.Map[_, _] => toTableRowFromMap(x.asScala, field)
+      case x: java.lang.Iterable[_] => toTableRowFromIterable(x.asScala, field)
       case x: IndexedRecord => toTableRow(x)
       case _ =>
         throw AvroConversionException(s"ToTableRow conversion failed: could not match $o")
@@ -48,22 +52,22 @@ trait ToTableRow {
   }
   // scalastyle:on cyclomatic.complexity
 
-  private def toTableRowFromIterable(iterable: Iterable[_], field: Schema.Field): Iterable[_] = {
+  private def toTableRowFromIterable(iterable: Iterable[Any], field: Schema.Field): List[_] = {
     iterable.map { item =>
       if (item.isInstanceOf[Iterable[_]] || item.isInstanceOf[Map[_, _]]) {
         throw AvroConversionException(s"ToTableRow conversion failed for item $item: " +
           s"iterable and map types not supported")
       }
       toTableRowField(item, field)
-    }
+    }.toList
   }
 
-  private def toTableRowFromMap(mapValue: Map[_, _], field: Schema.Field): Iterable[_] = {
+  private def toTableRowFromMap(mapValue: Iterable[Any], field: Schema.Field): List[_] = {
     mapValue.map { case (k, v) =>
       new TableRow()
         .set("key", toTableRowField(k, field))
         .set("value", toTableRowField(v, field))
-    }
+    }.toList
   }
 
   private def toByteArray(buffer: ByteBuffer) = {
