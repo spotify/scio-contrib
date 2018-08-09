@@ -36,14 +36,15 @@ object Implicits extends ToTableRow with ToTableSchema {
                                       private val cause: Throwable = null
                                     ) extends Exception(message, cause)
 
-  /**
-    * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
-    * automatically converting T's [[org.apache.avro.Schema AvroSchema]] to BigQuery's
-    * [[com.google.api.services.bigquery.model.TableSchema TableSchema]] and converting each
-    * [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
-    * [[com.spotify.scio.bigquery.TableRow TableRow]].
-    */
   implicit class AvroImplicits[T <: IndexedRecord](val self: SCollection[T]) {
+
+    /**
+      * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
+      * automatically converting T's [[org.apache.avro.Schema AvroSchema]] to BigQuery's
+      * [[com.google.api.services.bigquery.model.TableSchema TableSchema]] and converting each
+      * [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
+      * [[com.spotify.scio.bigquery.TableRow TableRow]].
+      */
     def saveAvroAsBigQuery(table: TableReference,
                        avroSchema: Schema,
                        writeDisposition: WriteDisposition,
