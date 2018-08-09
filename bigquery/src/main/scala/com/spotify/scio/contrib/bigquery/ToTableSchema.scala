@@ -88,16 +88,15 @@ trait ToTableSchema {
     }
 
     schemaType match {
-      case UNION => setFieldDataTypeFromUnion(field, schema)
-      case ARRAY => setFieldDataTypeFromArray(field, schema)
+      case UNION  => setFieldDataTypeFromUnion(field, schema)
+      case ARRAY  => setFieldDataTypeFromArray(field, schema)
       case RECORD => field.setFields(getFieldSchemas(schema).asJava)
-      case MAP => setFieldTypeFromMap(field, schema)
-      case _ =>
+      case MAP    => setFieldTypeFromMap(field, schema)
+      case _      =>
     }
   }
 
-  private def setFieldDataTypeFromUnion(field: TableFieldSchema,
-                                        schema: Schema): Unit = {
+  private def setFieldDataTypeFromUnion(field: TableFieldSchema, schema: Schema): Unit = {
     if (schema.getTypes.size != 2) {
       throw AvroConversionException("Union fields with > 2 types not supported")
     }
@@ -119,8 +118,7 @@ trait ToTableSchema {
       }
   }
 
-  private def setFieldDataTypeFromArray(field: TableFieldSchema,
-                                        schema: Schema): Unit = {
+  private def setFieldDataTypeFromArray(field: TableFieldSchema, schema: Schema): Unit = {
     if (field.getMode.equals("REPEATED")) {
       throw AvroConversionException("Array of arrays not supported")
     }
@@ -129,8 +127,7 @@ trait ToTableSchema {
     setFieldType(field, schema.getElementType)
   }
 
-  private def setFieldTypeFromMap(field: TableFieldSchema,
-                                  schema: Schema): Unit = {
+  private def setFieldTypeFromMap(field: TableFieldSchema, schema: Schema): Unit = {
     if (field.getMode.equals("REPEATED")) {
       throw AvroConversionException("Array of maps not supported")
     }
@@ -148,4 +145,3 @@ trait ToTableSchema {
     field.setFields(List(keyField, valueField).asJava)
   }
 }
-
