@@ -5,11 +5,11 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
@@ -40,7 +40,7 @@ trait ToTableRow {
   def toTableRow[T <: IndexedRecord](record: T): TableRow = {
     val row = new TableRow
 
-    record.getSchema.getFields.forEach { field =>
+    record.getSchema.getFields.asScala.foreach { field =>
       Option(record.get(field.pos)).foreach { fieldValue =>
         row.set(field.name, toTableRowField(fieldValue, field))
       }
