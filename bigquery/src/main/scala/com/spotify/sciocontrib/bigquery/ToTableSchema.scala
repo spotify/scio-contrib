@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 Spotify AB.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.spotify.sciocontrib.bigquery
 
 import com.google.api.services.bigquery.model.{TableFieldSchema, TableSchema}
@@ -8,7 +25,12 @@ import org.apache.avro.Schema.Type._
 
 import scala.collection.JavaConverters._
 
-trait ToSchema {
+/**
+  * Converts a [[org.apache.avro.Schema Schema]] object into a
+  * [[com.google.api.services.bigquery.model.TableSchema]] TableSchema.
+  * All Avro primitive and complex types are supported.
+  */
+trait ToTableSchema {
   private lazy val avroToBQTypes: Map[Type, String] = Map(
     STRING -> "STRING",
     ENUM -> "STRING",
@@ -18,12 +40,19 @@ trait ToSchema {
     FLOAT -> "FLOAT",
     DOUBLE -> "FLOAT",
     BOOLEAN -> "BOOLEAN",
-    RECORD -> "RECORD"
+    RECORD -> "RECORD",
+    FIXED -> "BYTES"
   )
 
   private lazy val supportedAvroTypes: Set[Type] =
     (avroToBQTypes.keys ++ Seq(UNION, ARRAY, RECORD, MAP)).toSet
 
+  /**
+    * Traverses all fields of the supplied avroSchema and converts it into
+    * a TableSchema containing TableFieldSchemas.
+    * @param avroSchema
+    * @return the equivalent BigQuery schema
+    */
   def toBigQuerySchema(avroSchema: Schema): TableSchema = {
     val fields = getFieldSchemas(avroSchema)
 

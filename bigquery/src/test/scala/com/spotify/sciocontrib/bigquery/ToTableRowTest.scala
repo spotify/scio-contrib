@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 Spotify AB.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.spotify.sciocontrib.bigquery
 
 import java.nio.ByteBuffer
@@ -23,6 +40,7 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
     .set("arrayField", List(new TableRow().set("nestedField", "nestedValue")).asJava)
     .set("mapField", List(new TableRow().set("key", "mapKey").set("value", 1.0D)).asJava)
     .set("enumField", Kind.FOO.toString)
+    .set("fixedField", BaseEncoding.base64Url().encode("1234567890123456".getBytes))
 
   "ToTableRow" should "convert a SpecificRecord to TableRow" in {
     val specificRecord = AvroExample.newBuilder()
@@ -38,6 +56,7 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
       .setMapField(Map("mapKey" -> 1.0D).asJava
         .asInstanceOf[java.util.Map[java.lang.CharSequence, java.lang.Double]])
       .setEnumField(Kind.FOO)
+      .setFixedField(new fixedType("1234567890123456".getBytes()))
       .build()
 
     toTableRow(specificRecord) shouldEqual expectedOutput
@@ -61,6 +80,7 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
     genericRecord.put("mapField", Map("mapKey" -> 1.0D).asJava
       .asInstanceOf[java.util.Map[java.lang.CharSequence, java.lang.Double]])
     genericRecord.put("enumField", Kind.FOO)
+    genericRecord.put("fixedField", new fixedType("1234567890123456".getBytes()))
 
     toTableRow(genericRecord) shouldEqual expectedOutput
   }

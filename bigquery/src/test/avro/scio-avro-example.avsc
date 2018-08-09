@@ -11,7 +11,7 @@
     {"name": "floatField", "type": "float"},
     {"name": "bytesField", "type": "bytes"},
     {"name": "unionField", "type": ["null", "string"]},
-    {"name": "arrayField", "type": {
+    {"name": "arrayField", "doc": "some array doc", "type": {
       "type": "array", "items": {
         "type": "record",
         "name": "NestedAvro",
@@ -21,6 +21,7 @@
       }
     },
     {"name": "mapField", "type": { "type": "map", "values": "double" } },
-    {"name": "enumField", "type": { "type": "enum", "name": "Kind", "symbols" : ["FOO", "BAR"] } }
+    {"name": "enumField", "type": { "type": "enum", "name": "Kind", "symbols" : ["FOO", "BAR"] } },
+    {"name": "fixedField", "type": { "type": "fixed", "size": 16, "name": "fixedType" }}
   ]
 }

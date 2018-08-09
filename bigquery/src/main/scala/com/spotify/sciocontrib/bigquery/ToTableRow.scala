@@ -1,3 +1,20 @@
+/*
+ * Copyright 2018 Spotify AB.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.spotify.sciocontrib.bigquery
 
 import java.nio.ByteBuffer
@@ -7,10 +24,14 @@ import com.google.common.io.BaseEncoding
 import com.spotify.scio.bigquery.TableRow
 import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
-import org.apache.avro.generic.IndexedRecord
+import org.apache.avro.generic.{GenericFixed, IndexedRecord}
 
 import scala.collection.JavaConverters._
 
+/**
+  * Converts an [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
+  * [[com.spotify.scio.bigquery.TableRow TableRow]].
+  */
 trait ToTableRow {
   private lazy val encodingPropName: String = "bigquery.bytes.encoder"
   private lazy val base64Encoding: BaseEncoding = BaseEncoding.base64Url()
@@ -35,18 +56,14 @@ trait ToTableRow {
       case x: Enum[_] => x.name()
       case x: Number => x
       case x: Boolean => x
-      case x: ByteBuffer =>
-        Option(field.schema().getProp(encodingPropName)) match {
-          case Some("BASE64") => base64Encoding.encode(toByteArray(x))
-          case Some("HEX") => hexEncoding.encode(toByteArray(x))
-          case Some(encoding) => throw AvroConversionException(s"Unsupported encoding $encoding")
-          case None => base64Encoding.encode(toByteArray(x))
-        }
+      case x: GenericFixed => encodeByteArray(x.bytes(), field.schema())
+      case x: ByteBuffer => encodeByteArray(toByteArray(x), field.schema())
       case x: util.Map[_, _] => toTableRowFromMap(x.asScala, field)
       case x: java.lang.Iterable[_] => toTableRowFromIterable(x.asScala, field)
       case x: IndexedRecord => toTableRow(x)
       case _ =>
-        throw AvroConversionException(s"ToTableRow conversion failed: could not match $fieldValue")
+        throw AvroConversionException(s"ToTableRow conversion failed:" +
+          s"could not match ${fieldValue.getClass}")
     }
   }
   // scalastyle:on cyclomatic.complexity
@@ -67,6 +84,15 @@ trait ToTableRow {
         .set("key", toTableRowField(k, field))
         .set("value", toTableRowField(v, field))
     }.toList.asJava
+  }
+
+  private def encodeByteArray(bytes: Array[Byte], fieldSchema: Schema): String = {
+    Option(fieldSchema.getProp(encodingPropName)) match {
+      case Some("BASE64") => base64Encoding.encode(bytes)
+      case Some("HEX") => hexEncoding.encode(bytes)
+      case Some(encoding) => throw AvroConversionException(s"Unsupported encoding $encoding")
+      case None => base64Encoding.encode(bytes)
+    }
   }
 
   private def toByteArray(buffer: ByteBuffer) = {
