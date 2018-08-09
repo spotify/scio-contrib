@@ -1,6 +1,5 @@
 package com.spotify.sciocontrib.bigquery
 
-import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.bigquery.model.{TableFieldSchema, TableSchema}
 import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
@@ -22,31 +21,27 @@ trait ToSchema {
     RECORD -> "RECORD"
   )
 
-  private lazy val supportedAvroTypes: Set[Type] = (avroToBQTypes.keys ++
-    Seq(UNION, ARRAY, RECORD, MAP)).toSet
+  private lazy val supportedAvroTypes: Set[Type] =
+    (avroToBQTypes.keys ++ Seq(UNION, ARRAY, RECORD, MAP)).toSet
 
   def toBigQuerySchema(avroSchema: Schema): TableSchema = {
     val fields = getFieldSchemas(avroSchema)
 
-    val schema = new TableSchema().setFields(fields.asJava)
-    schema.setFactory(new JacksonFactory)
-
-    schema
+    new TableSchema().setFields(fields.asJava)
   }
 
   private def getFieldSchemas(avroSchema: Schema): List[TableFieldSchema] = {
     avroSchema.getFields.asScala.map { field =>
       val tableField = new TableFieldSchema()
-        .setName(field.name())
+        .setName(field.name)
 
-      Option(field.doc()).foreach(tableField.setDescription)
+      Option(field.doc).foreach(tableField.setDescription)
 
-      setFieldType(tableField, field.schema())
+      setFieldType(tableField, field.schema)
       tableField
     }.toList
   }
 
-  // scalastyle:off cyclomatic.complexity
   private def setFieldType(field: TableFieldSchema, schema: Schema): Unit = {
     val schemaType = schema.getType
 
@@ -61,17 +56,16 @@ trait ToSchema {
     avroToBQTypes.get(schemaType).foreach { bqType => field.setType(bqType) }
 
     schemaType match {
-      case UNION => setFieldDataTypeFromUnion(field, schema); ()
-      case ARRAY => setFieldDataTypeFromArray(field, schema); ()
-      case RECORD => field.setFields(getFieldSchemas(schema).asJava); ()
-      case MAP => setFieldTypeFromMap(field, schema); ()
-      case _ => ()
+      case UNION => setFieldDataTypeFromUnion(field, schema)
+      case ARRAY => setFieldDataTypeFromArray(field, schema)
+      case RECORD => field.setFields(getFieldSchemas(schema).asJava)
+      case MAP => setFieldTypeFromMap(field, schema)
+      case _ =>
     }
   }
-  // scalastyle:on cyclomatic.complexity
 
   private def setFieldDataTypeFromUnion(field: TableFieldSchema, schema: Schema): Unit = {
-    if (schema.getTypes.size() != 2) {
+    if (schema.getTypes.size != 2) {
       throw AvroConversionException("Union fields with > 2 types not supported")
     }
 
@@ -110,6 +104,6 @@ trait ToSchema {
     val valueField = new TableFieldSchema().setName("value")
     setFieldType(valueField, schema.getValueType)
 
-    field.setFields(List(keyField, valueField).asJava); ()
+    field.setFields(List(keyField, valueField).asJava)
   }
 }

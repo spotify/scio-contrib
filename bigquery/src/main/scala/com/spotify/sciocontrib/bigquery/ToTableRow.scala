@@ -7,7 +7,7 @@ import com.google.common.io.BaseEncoding
 import com.spotify.scio.bigquery.TableRow
 import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
-import org.apache.avro.generic.{GenericData, IndexedRecord}
+import org.apache.avro.generic.IndexedRecord
 
 import scala.collection.JavaConverters._
 
@@ -29,11 +29,10 @@ trait ToTableRow {
   }
 
   // scalastyle:off cyclomatic.complexity
-  private def toTableRowField[T](o: T, field: Schema.Field): Any = {
-    o match {
+  private def toTableRowField(fieldValue: Any, field: Schema.Field): Any = {
+    fieldValue match {
       case x: CharSequence => x.toString
       case x: Enum[_] => x.name()
-      case x: GenericData.EnumSymbol => x.toString
       case x: Number => x
       case x: Boolean => x
       case x: ByteBuffer =>
@@ -47,27 +46,27 @@ trait ToTableRow {
       case x: java.lang.Iterable[_] => toTableRowFromIterable(x.asScala, field)
       case x: IndexedRecord => toTableRow(x)
       case _ =>
-        throw AvroConversionException(s"ToTableRow conversion failed: could not match $o")
+        throw AvroConversionException(s"ToTableRow conversion failed: could not match $fieldValue")
     }
   }
   // scalastyle:on cyclomatic.complexity
 
-  private def toTableRowFromIterable(iterable: Iterable[Any], field: Schema.Field): List[_] = {
+  private def toTableRowFromIterable(iterable: Iterable[Any], field: Schema.Field): util.List[_] = {
     iterable.map { item =>
       if (item.isInstanceOf[Iterable[_]] || item.isInstanceOf[Map[_, _]]) {
         throw AvroConversionException(s"ToTableRow conversion failed for item $item: " +
           s"iterable and map types not supported")
       }
       toTableRowField(item, field)
-    }.toList
+    }.toList.asJava
   }
 
-  private def toTableRowFromMap(mapValue: Iterable[Any], field: Schema.Field): List[_] = {
-    mapValue.map { case (k, v) =>
+  private def toTableRowFromMap(map: Iterable[Any], field: Schema.Field): util.List[_] = {
+    map.map { case (k, v) =>
       new TableRow()
         .set("key", toTableRowField(k, field))
         .set("value", toTableRowField(v, field))
-    }.toList
+    }.toList.asJava
   }
 
   private def toByteArray(buffer: ByteBuffer) = {

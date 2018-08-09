@@ -20,8 +20,8 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
     .set("floatField", 1F)
     .set("bytesField", BaseEncoding.base64Url().encode("someBytes".getBytes))
     .set("unionField", "someUnion")
-    .set("arrayField", List(new TableRow().set("nestedField", "nestedValue")))
-    .set("mapField", List(new TableRow().set("key", "mapKey").set("value", 1.0D)))
+    .set("arrayField", List(new TableRow().set("nestedField", "nestedValue")).asJava)
+    .set("mapField", List(new TableRow().set("key", "mapKey").set("value", 1.0D)).asJava)
     .set("enumField", Kind.FOO.toString)
 
   "ToTableRow" should "convert a SpecificRecord to TableRow" in {

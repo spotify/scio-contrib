@@ -34,8 +34,7 @@ val commonSettings = Seq(
   javacOptions in (Compile, doc) := Seq("-source", "1.8"),
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-core" % scioVersion,
-    "com.spotify" %% "scio-test" % scioVersion,
-    "org.apache.beam" % "beam-runners-google-cloud-dataflow-java" % "2.5.0"
+    "com.spotify" %% "scio-test" % scioVersion
   )
 )
 
@@ -45,19 +44,11 @@ val noPublishSettings = Seq(
   publishArtifact := false
 )
 
-lazy val paradiseDependency =
-  "org.scalamacros" % "paradise" % scalaMacrosVersion cross CrossVersion.full
-
-lazy val macroSettings = Seq(
-  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-  addCompilerPlugin(paradiseDependency)
-)
-
 lazy val scioContribBigQuery: Project = Project(
   "scio-contrib-biquery",
   file("bigquery")
 ).settings(
-  commonSettings ++ macroSettings ++ noPublishSettings,
+  commonSettings ++ noPublishSettings,
   description := "Contributions to Scio's BigQuery tap",
   version in AvroConfig := avroVersion,
   libraryDependencies ++= Seq(
@@ -103,7 +94,6 @@ lazy val commonScalacOptions = Seq(
   "-Xlint:private-shadow", // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align", // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow", // A local type parameter shadows a type already in scope.
-  "-Xlint:unsound-match", // Pattern match may not be typesafe.
   "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
   "-Ypartial-unification", // Enable partial unification in type constructor inference
   "-Ywarn-dead-code", // Warn when dead code is identified.
@@ -112,5 +102,4 @@ lazy val commonScalacOptions = Seq(
   "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Ywarn-nullary-unit", // Warn when nullary methods return Unit.
   "-Ywarn-numeric-widen", // Warn when numerics are widened.
-  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
 )
