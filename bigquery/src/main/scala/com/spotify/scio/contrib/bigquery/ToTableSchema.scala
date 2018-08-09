@@ -25,7 +25,6 @@ import org.apache.avro.Schema.Type._
 
 import scala.collection.JavaConverters._
 
-
 /**
   * Converts a [[org.apache.avro.Schema Schema]] object into a
   * [[com.google.api.services.bigquery.model.TableSchema]] TableSchema.
@@ -83,18 +82,21 @@ trait ToTableSchema {
       field.setMode("REQUIRED")
     }
 
-    avroToBQTypes.get(schemaType).foreach { bqType => field.setType(bqType) }
+    avroToBQTypes.get(schemaType).foreach { bqType =>
+      field.setType(bqType)
+    }
 
     schemaType match {
-      case UNION => setFieldDataTypeFromUnion(field, schema)
-      case ARRAY => setFieldDataTypeFromArray(field, schema)
+      case UNION  => setFieldDataTypeFromUnion(field, schema)
+      case ARRAY  => setFieldDataTypeFromArray(field, schema)
       case RECORD => field.setFields(getFieldSchemas(schema).asJava)
-      case MAP => setFieldTypeFromMap(field, schema)
-      case _ =>
+      case MAP    => setFieldTypeFromMap(field, schema)
+      case _      =>
     }
   }
 
-  private def setFieldDataTypeFromUnion(field: TableFieldSchema, schema: Schema): Unit = {
+  private def setFieldDataTypeFromUnion(field: TableFieldSchema,
+                                        schema: Schema): Unit = {
     if (schema.getTypes.size != 2) {
       throw AvroConversionException("Union fields with > 2 types not supported")
     }
@@ -109,11 +111,15 @@ trait ToTableSchema {
 
     field.setMode("NULLABLE")
 
-    schema.getTypes.asScala.find(_.getType != NULL)
-      .foreach { fieldType => setFieldType(field, fieldType) }
+    schema.getTypes.asScala
+      .find(_.getType != NULL)
+      .foreach { fieldType =>
+        setFieldType(field, fieldType)
+      }
   }
 
-  private def setFieldDataTypeFromArray(field: TableFieldSchema, schema: Schema): Unit = {
+  private def setFieldDataTypeFromArray(field: TableFieldSchema,
+                                        schema: Schema): Unit = {
     if (field.getMode.equals("REPEATED")) {
       throw AvroConversionException("Array of arrays not supported")
     }
@@ -122,7 +128,8 @@ trait ToTableSchema {
     setFieldType(field, schema.getElementType)
   }
 
-  private def setFieldTypeFromMap(field: TableFieldSchema, schema: Schema): Unit = {
+  private def setFieldTypeFromMap(field: TableFieldSchema,
+                                  schema: Schema): Unit = {
     if (field.getMode.equals("REPEATED")) {
       throw AvroConversionException("Array of maps not supported")
     }
@@ -130,7 +137,10 @@ trait ToTableSchema {
     field.setMode("REPEATED")
     field.setType("RECORD")
 
-    val keyField = new TableFieldSchema().setName("key").setType("STRING").setMode("REQUIRED")
+    val keyField = new TableFieldSchema()
+      .setName("key")
+      .setType("STRING")
+      .setMode("REQUIRED")
     val valueField = new TableFieldSchema().setName("value")
     setFieldType(valueField, schema.getValueType)
 

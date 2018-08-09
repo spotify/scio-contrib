@@ -22,7 +22,12 @@ import java.nio.ByteBuffer
 import com.google.common.io.BaseEncoding
 import com.google.protobuf.ByteString
 import com.spotify.scio.bigquery.TableRow
-import com.spotify.sciocontrib.bigquery.{AvroExample, Kind, NestedAvro, fixedType}
+import com.spotify.sciocontrib.bigquery.{
+  AvroExample,
+  Kind,
+  NestedAvro,
+  fixedType
+}
 import org.apache.avro.generic.GenericData
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -38,21 +43,27 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
     .set("floatField", 1F)
     .set("bytesField", BaseEncoding.base64Url().encode("someBytes".getBytes))
     .set("unionField", "someUnion")
-    .set("arrayField", List(new TableRow().set("nestedField", "nestedValue")).asJava)
-    .set("mapField", List(new TableRow().set("key", "mapKey").set("value", 1.0D)).asJava)
+    .set("arrayField",
+         List(new TableRow().set("nestedField", "nestedValue")).asJava)
+    .set("mapField",
+         List(new TableRow().set("key", "mapKey").set("value", 1.0D)).asJava)
     .set("enumField", Kind.FOO.toString)
-    .set("fixedField", BaseEncoding.base64Url().encode("1234567890123456".getBytes))
+    .set("fixedField",
+         BaseEncoding.base64Url().encode("1234567890123456".getBytes))
 
   "ToTableRow" should "convert a SpecificRecord to TableRow" in {
-    val specificRecord = AvroExample.newBuilder()
+    val specificRecord = AvroExample
+      .newBuilder()
       .setBooleanField(true)
       .setStringField("someString")
       .setDoubleField(1.0)
       .setLongField(1L)
       .setIntField(1)
       .setFloatField(1F)
-      .setBytesField(ByteBuffer.wrap(ByteString.copyFromUtf8("someBytes").toByteArray))
-      .setArrayField(List(NestedAvro.newBuilder().setNestedField("nestedValue").build()).asJava)
+      .setBytesField(ByteBuffer.wrap(
+        ByteString.copyFromUtf8("someBytes").toByteArray))
+      .setArrayField(List(
+        NestedAvro.newBuilder().setNestedField("nestedValue").build()).asJava)
       .setUnionField("someUnion")
       .setMapField(Map("mapKey" -> 1.0D).asJava
         .asInstanceOf[java.util.Map[java.lang.CharSequence, java.lang.Double]])
@@ -74,14 +85,18 @@ class ToTableRowTest extends FlatSpec with Matchers with ToTableRow {
     genericRecord.put("longField", 1L)
     genericRecord.put("intField", 1)
     genericRecord.put("floatField", 1F)
-    genericRecord.put("bytesField",
+    genericRecord.put(
+      "bytesField",
       ByteBuffer.wrap(ByteString.copyFromUtf8("someBytes").toByteArray))
     genericRecord.put("arrayField", List(nestedAvro).asJava)
     genericRecord.put("unionField", "someUnion")
-    genericRecord.put("mapField", Map("mapKey" -> 1.0D).asJava
-      .asInstanceOf[java.util.Map[java.lang.CharSequence, java.lang.Double]])
+    genericRecord.put(
+      "mapField",
+      Map("mapKey" -> 1.0D).asJava
+        .asInstanceOf[java.util.Map[java.lang.CharSequence, java.lang.Double]])
     genericRecord.put("enumField", Kind.FOO)
-    genericRecord.put("fixedField", new fixedType("1234567890123456".getBytes()))
+    genericRecord.put("fixedField",
+                      new fixedType("1234567890123456".getBytes()))
 
     toTableRow(genericRecord) shouldEqual expectedOutput
   }
