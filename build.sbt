@@ -15,7 +15,12 @@
  * under the License.
  */
 
+import sbt._
 import sbt.Keys._
+
+val scioVersion = "0.5.6"
+val scalaMacrosVersion = "2.1.1"
+val avroVersion = "1.8.2"
 
 val commonSettings = Seq(
   organization := "com.spotify",
@@ -26,7 +31,11 @@ val commonSettings = Seq(
   scalacOptions ++= commonScalacOptions,
   scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
-  javacOptions in (Compile, doc) := Seq("-source", "1.8")
+  javacOptions in (Compile, doc) := Seq("-source", "1.8"),
+  libraryDependencies ++= Seq(
+    "com.spotify" %% "scio-core" % scioVersion % "provided",
+    "com.spotify" %% "scio-test" % scioVersion % "test"
+  )
 )
 
 val noPublishSettings = Seq(
@@ -35,10 +44,29 @@ val noPublishSettings = Seq(
   publishArtifact := false
 )
 
+lazy val scioContribBigQuery: Project = Project(
+  "scio-contrib-biquery",
+  file("bigquery")
+).settings(
+  commonSettings ++ noPublishSettings,
+  description := "Contributions to Scio's BigQuery tap",
+  version in AvroConfig := avroVersion,
+  libraryDependencies ++= Seq(
+    "com.spotify" %% "scio-bigquery" % scioVersion,
+    "com.spotify" %% "scio-avro" % scioVersion
+  ),
+  (sourceDirectory in AvroConfig) := baseDirectory.value / "src/test/avro/",
+  sourceDirectories in Compile := (sourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
+  managedSourceDirectories in Compile := (managedSourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
+  sources in doc in Compile := List(), // suppress warnings
+  compileOrder := CompileOrder.JavaThenScala
+)
+
 lazy val root: Project = project
   .in(file("."))
   .settings(commonSettings)
   .settings(noPublishSettings)
+  .aggregate(scioContribBigQuery)
 
 // sampled from https://tpolecat.github.io/2017/04/25/scalac-flags.html
 lazy val commonScalacOptions = Seq(
@@ -66,7 +94,6 @@ lazy val commonScalacOptions = Seq(
   "-Xlint:private-shadow", // A private field (or class parameter) shadows a superclass field.
   "-Xlint:stars-align", // Pattern sequence wildcard must align with sequence component.
   "-Xlint:type-parameter-shadow", // A local type parameter shadows a type already in scope.
-  "-Xlint:unsound-match", // Pattern match may not be typesafe.
   "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
   "-Ypartial-unification", // Enable partial unification in type constructor inference
   "-Ywarn-dead-code", // Warn when dead code is identified.
@@ -75,5 +102,4 @@ lazy val commonScalacOptions = Seq(
   "-Ywarn-nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Ywarn-nullary-unit", // Warn when nullary methods return Unit.
   "-Ywarn-numeric-widen", // Warn when numerics are widened.
-  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
 )
