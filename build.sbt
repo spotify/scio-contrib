@@ -56,8 +56,10 @@ lazy val scioContribBigQuery: Project = Project(
     "com.spotify" %% "scio-avro" % scioVersion
   ),
   (sourceDirectory in AvroConfig) := baseDirectory.value / "src/test/avro/",
-  sourceDirectories in Compile := (sourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
-  managedSourceDirectories in Compile := (managedSourceDirectories in Compile).value.filterNot(_.getPath.endsWith("/src_managed/main")),
+  sourceDirectories in Compile := (sourceDirectories in Compile).value
+    .filterNot(_.getPath.endsWith("/src_managed/main")),
+  managedSourceDirectories in Compile := (managedSourceDirectories in Compile).value
+    .filterNot(_.getPath.endsWith("/src_managed/main")),
   sources in doc in Compile := List(), // suppress warnings
   compileOrder := CompileOrder.JavaThenScala
 )

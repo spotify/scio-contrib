@@ -8,8 +8,8 @@
  </check>
  <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
   <parameters>
-    <parameter name="regex">true</parameter>
-    <parameter name="header"><![CDATA[/\*
+   <parameter name="regex">true</parameter>
+   <parameter name="header"><![CDATA[/\*
  \* Copyright \d{4} Spotify AB.
  \*
  \* Licensed under the Apache License, Version 2.0 \(the "License"\);
