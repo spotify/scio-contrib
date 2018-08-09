@@ -15,21 +15,21 @@
  * under the License.
  */
 
-package com.spotify.sciocontrib.bigquery
+package com.spotify.scio.contrib.bigquery
 
-import com.google.api.services.bigquery.model.{TableReference, TableSchema}
+import com.google.api.services.bigquery.model.TableReference
 import com.spotify.scio.bigquery.TableRow
 import com.spotify.scio.io.Tap
+import com.spotify.scio.util.ScioUtil
 import com.spotify.scio.values.SCollection
 import org.apache.avro.Schema
 import org.apache.avro.generic.IndexedRecord
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.{CreateDisposition, WriteDisposition}
 
 import scala.concurrent.Future
+import scala.reflect.ClassTag
 
-/**
-  * Provides implicit helpers for SCollections interacting with BigQuery.
-  */
+/** Provides implicit helpers for SCollections interacting with BigQuery. */
 object Implicits extends ToTableRow with ToTableSchema {
   case class AvroConversionException(
                                       private val message: String,
@@ -37,7 +37,6 @@ object Implicits extends ToTableRow with ToTableSchema {
                                     ) extends Exception(message, cause)
 
   implicit class AvroImplicits[T <: IndexedRecord](val self: SCollection[T]) {
-
     /**
       * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
       * automatically converting T's [[org.apache.avro.Schema AvroSchema]] to BigQuery's
@@ -46,12 +45,20 @@ object Implicits extends ToTableRow with ToTableSchema {
       * [[com.spotify.scio.bigquery.TableRow TableRow]].
       */
     def saveAvroAsBigQuery(table: TableReference,
-                       avroSchema: Schema,
-                       writeDisposition: WriteDisposition,
-                       createDisposition: CreateDisposition,
-                       tableDescription: String): Future[Tap[TableRow]] = {
-      val bqSchema: TableSchema = toBigQuerySchema(avroSchema)
+                       avroSchema: Schema = null,
+                       writeDisposition: WriteDisposition = null,
+                       createDisposition: CreateDisposition = null,
+                       tableDescription: String = null)(implicit c: ClassTag[T]):
+    Future[Tap[TableRow]] = {
+      val schema: Schema = Option(avroSchema)
+        .getOrElse {
+          val cls = ScioUtil.classOf[T]
+          if (classOf[IndexedRecord] isAssignableFrom cls) {
+            cls.getMethod("getClassSchema").invoke(null).asInstanceOf[Schema]
+          } else { throw AvroConversionException("Could not parse $SCHEMA from provided Avro type") }
+        }
 
+      val bqSchema = toBigQuerySchema(schema)
       self
         .map(toTableRow)
         .saveAsBigQuery(table, bqSchema, writeDisposition, createDisposition, tableDescription)

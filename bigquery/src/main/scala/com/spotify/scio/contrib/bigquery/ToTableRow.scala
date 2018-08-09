@@ -15,18 +15,19 @@
  * under the License.
  */
 
-package com.spotify.sciocontrib.bigquery
+package com.spotify.scio.contrib.bigquery
 
 import java.nio.ByteBuffer
 import java.util
 
 import com.google.common.io.BaseEncoding
 import com.spotify.scio.bigquery.TableRow
-import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
+import com.spotify.scio.contrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
 import org.apache.avro.generic.{GenericFixed, IndexedRecord}
 
 import scala.collection.JavaConverters._
+
 
 /**
   * Converts an [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
@@ -103,3 +104,5 @@ trait ToTableRow {
     bytes
   }
 }
+
+object ToTableRow extends ToTableRow

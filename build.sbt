@@ -33,8 +33,8 @@ val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
   javacOptions in (Compile, doc) := Seq("-source", "1.8"),
   libraryDependencies ++= Seq(
-    "com.spotify" %% "scio-core" % scioVersion,
-    "com.spotify" %% "scio-test" % scioVersion
+    "com.spotify" %% "scio-core" % scioVersion % "provided",
+    "com.spotify" %% "scio-test" % scioVersion % "test"
   )
 )
 

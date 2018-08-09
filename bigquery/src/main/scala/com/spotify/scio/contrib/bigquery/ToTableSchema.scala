@@ -15,15 +15,16 @@
  * under the License.
  */
 
-package com.spotify.sciocontrib.bigquery
+package com.spotify.scio.contrib.bigquery
 
 import com.google.api.services.bigquery.model.{TableFieldSchema, TableSchema}
-import com.spotify.sciocontrib.bigquery.Implicits.AvroConversionException
+import com.spotify.scio.contrib.bigquery.Implicits.AvroConversionException
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Type
 import org.apache.avro.Schema.Type._
 
 import scala.collection.JavaConverters._
+
 
 /**
   * Converts a [[org.apache.avro.Schema Schema]] object into a
@@ -136,3 +137,5 @@ trait ToTableSchema {
     field.setFields(List(keyField, valueField).asJava)
   }
 }
+
+object ToTableSchema extends ToTableSchema

@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "namespace": "com.spotify.sciocontrib.bigquery",
+  "namespace": "com.spotify.scio.contrib.bigquery",
   "name": "AvroExample",
   "fields": [
     {"name": "intField", "type": "int"},

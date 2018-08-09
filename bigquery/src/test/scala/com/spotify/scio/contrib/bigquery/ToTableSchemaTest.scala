@@ -15,9 +15,10 @@
  * under the License.
  */
 
-package com.spotify.sciocontrib.bigquery
+package com.spotify.scio.contrib.bigquery
 
 import com.google.api.services.bigquery.model.{TableFieldSchema, TableSchema}
+import com.spotify.sciocontrib.bigquery.AvroExample
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
