@@ -35,6 +35,34 @@ val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-core" % scioVersion % "provided",
     "com.spotify" %% "scio-test" % scioVersion % "test"
+  ),
+  releaseCrossBuild := true,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  sonatypeProfileName := "com.spotify",
+  licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  homepage := Some(url("https://github.com/spotify/scio-contrib")),
+  scmInfo := Some(
+    ScmInfo(url("https://github.com/spotify/scio-contrib.git"),
+            "scm:git:git@github.com:spotify/scio-contrib.git")),
+  developers := List(
+    Developer(id = "sinisa_lyh",
+              name = "Neville Li",
+              email = "neville.lyh@gmail.com",
+              url = url("https://twitter.com/sinisa_lyh")),
+    Developer(id = "clairemcginty",
+              name = "Claire McGinty",
+              email = "claire.d.mcginty@gmail.com",
+              url = url("https://github.com/clairemcginty")),
+    Developer(id = "regadas",
+              name = "Filipe Regadas",
+              email = "filiperegadas@gmail.com",
+              url = url("https://twitter.com/regadas")),
+    Developer(id = "jto",
+              name = "Julien Tournay",
+              email = "julient@spotify.com",
+              url = url("https://twitter.com/skaalf"))
   )
 )
 
