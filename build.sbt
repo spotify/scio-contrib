@@ -24,7 +24,6 @@ val avroVersion = "1.8.2"
 
 val commonSettings = Seq(
   organization := "com.spotify",
-  name := "scio-contrib",
   description := "Community-supported add-ons to Scio",
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
