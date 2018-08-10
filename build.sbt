@@ -81,7 +81,7 @@ lazy val scioContribBigQuery: Project = Project(
   "scio-contrib-biquery",
   file("bigquery")
 ).settings(
-  commonSettings ++ noPublishSettings,
+  commonSettings,
   description := "Contributions to Scio's BigQuery tap",
   version in AvroConfig := avroVersion,
   libraryDependencies ++= Seq(
