@@ -36,6 +36,11 @@ val commonSettings = Seq(
     "com.spotify" %% "scio-core" % scioVersion % "provided",
     "com.spotify" %% "scio-test" % scioVersion % "test"
   ),
+  publishTo := Some(if (isSnapshot.value) {
+    Opts.resolver.sonatypeSnapshots
+  } else {
+    Opts.resolver.sonatypeStaging
+  }),
   releaseCrossBuild := true,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   publishMavenStyle := true,
