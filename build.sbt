@@ -77,7 +77,7 @@ val noPublishSettings = Seq(
 )
 
 lazy val scioContribBigQuery: Project = Project(
-  "scio-contrib-biquery",
+  "scio-contrib-bigquery",
   file("bigquery")
 ).settings(
   commonSettings,
