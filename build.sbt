@@ -18,7 +18,7 @@
 import sbt._
 import sbt.Keys._
 
-val scioVersion = "0.5.6"
+val scioVersion = "0.5.7"
 val scalaMacrosVersion = "2.1.1"
 val avroVersion = "1.8.2"
 
