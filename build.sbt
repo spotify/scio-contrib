@@ -24,6 +24,8 @@ val avroVersion = "1.8.2"
 
 val commonSettings = Seq(
   organization := "com.spotify",
+  organizationName := "Spotify AB.",
+  startYear := Some(2018),
   description := "Community-supported add-ons to Scio",
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
@@ -45,7 +47,7 @@ val commonSettings = Seq(
   publishMavenStyle := true,
   publishArtifact in Test := false,
   sonatypeProfileName := "com.spotify",
-  licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
+  licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://github.com/spotify/scio-contrib")),
   scmInfo := Some(
     ScmInfo(url("https://github.com/spotify/scio-contrib.git"),
