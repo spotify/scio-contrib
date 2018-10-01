@@ -30,9 +30,9 @@ val commonSettings = Seq(
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq("2.11.12", "2.12.6"),
   scalacOptions ++= commonScalacOptions,
-  scalacOptions in (Compile, console) --= Seq("-Xfatal-warnings"),
+  Compile / console / scalacOptions --= Seq("-Xfatal-warnings"),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
-  javacOptions in (Compile, doc) := Seq("-source", "1.8"),
+  Compile / doc / javacOptions := Seq("-source", "1.8"),
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-core" % scioVersion % "provided",
     "com.spotify" %% "scio-test" % scioVersion % "test"
@@ -45,7 +45,7 @@ val commonSettings = Seq(
   releaseCrossBuild := true,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   publishMavenStyle := true,
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   sonatypeProfileName := "com.spotify",
   licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   homepage := Some(url("https://github.com/spotify/scio-contrib")),
@@ -72,36 +72,33 @@ val commonSettings = Seq(
   )
 )
 
-val noPublishSettings = Seq(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false
-)
-
 lazy val scioContribBigQuery: Project = Project(
   "scio-contrib-bigquery",
   file("bigquery")
 ).settings(
   commonSettings,
   description := "Contributions to Scio's BigQuery tap",
-  version in AvroConfig := avroVersion,
+  AvroConfig / version := avroVersion,
   libraryDependencies ++= Seq(
     "com.spotify" %% "scio-bigquery" % scioVersion,
     "com.spotify" %% "scio-avro" % scioVersion
   ),
-  (sourceDirectory in AvroConfig) := baseDirectory.value / "src/test/avro/",
-  sourceDirectories in Compile := (sourceDirectories in Compile).value
+  AvroConfig / sourceDirectory := baseDirectory.value / "src/test/avro/",
+  Compile / sourceDirectories := (Compile / sourceDirectories).value
     .filterNot(_.getPath.endsWith("/src_managed/main")),
-  managedSourceDirectories in Compile := (managedSourceDirectories in Compile).value
+  Compile / managedSourceDirectories := (Compile / managedSourceDirectories).value
     .filterNot(_.getPath.endsWith("/src_managed/main")),
-  sources in doc in Compile := List(), // suppress warnings
+  Compile / doc / sources := List(), // suppress warnings
   compileOrder := CompileOrder.JavaThenScala
 )
 
 lazy val root: Project = project
   .in(file("."))
   .settings(commonSettings)
-  .settings(noPublishSettings)
+  .settings(
+    name := "scio-contrib",
+    publish / skip := true
+  )
   .aggregate(scioContribBigQuery)
 
 // sampled from https://tpolecat.github.io/2017/04/25/scalac-flags.html
