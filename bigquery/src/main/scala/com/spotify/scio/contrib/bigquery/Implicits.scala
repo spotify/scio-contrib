@@ -17,7 +17,7 @@
 package com.spotify.scio.contrib.bigquery
 
 import com.google.api.services.bigquery.model.TableReference
-import com.spotify.scio.bigquery.TableRow
+import com.spotify.scio.bigquery._
 import com.spotify.scio.io.Tap
 import com.spotify.scio.util.ScioUtil
 import com.spotify.scio.values.SCollection
