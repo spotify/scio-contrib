@@ -22,6 +22,11 @@ val scioVersion = "0.7.0-alpha2"
 val scalaMacrosVersion = "2.1.1"
 val avroVersion = "1.8.2"
 
+val ScioCore = "com.spotify" %% "scio-core" % scioVersion
+val ScioTest = "com.spotify" %% "scio-test" % scioVersion
+val ScioAvro = "com.spotify" %% "scio-avro" % scioVersion
+val ScioBigQuery = "com.spotify" %% "scio-bigquery" % scioVersion
+
 val commonSettings = Seq(
   organization := "com.spotify",
   organizationName := "Spotify AB.",
@@ -34,9 +39,12 @@ val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint:unchecked"),
   Compile / doc / javacOptions := Seq("-source", "1.8"),
   libraryDependencies ++= Seq(
-    "com.spotify" %% "scio-core" % scioVersion % "provided",
-    "com.spotify" %% "scio-test" % scioVersion % "test"
-  ),
+    ScioCore % Provided,
+    ScioTest % Test
+  )
+)
+
+lazy val publishSettings = Seq(
   publishTo := Some(if (isSnapshot.value) {
     Opts.resolver.sonatypeSnapshots
   } else {
@@ -72,25 +80,26 @@ val commonSettings = Seq(
   )
 )
 
-lazy val scioContribBigQuery: Project = Project(
-  "scio-contrib-bigquery",
-  file("bigquery")
-).settings(
-  commonSettings,
-  description := "Contributions to Scio's BigQuery tap",
-  AvroConfig / version := avroVersion,
-  libraryDependencies ++= Seq(
-    "com.spotify" %% "scio-bigquery" % scioVersion,
-    "com.spotify" %% "scio-avro" % scioVersion
-  ),
-  AvroConfig / sourceDirectory := baseDirectory.value / "src/test/avro/",
-  Compile / sourceDirectories := (Compile / sourceDirectories).value
-    .filterNot(_.getPath.endsWith("/src_managed/main")),
-  Compile / managedSourceDirectories := (Compile / managedSourceDirectories).value
-    .filterNot(_.getPath.endsWith("/src_managed/main")),
-  Compile / doc / sources := List(), // suppress warnings
-  compileOrder := CompileOrder.JavaThenScala
-)
+lazy val scioContribBigQuery: Project = project
+  .in(file("bigquery"))
+  .settings(commonSettings)
+  .settings(publishSettings)
+  .settings(
+    name := "scio-contrib-bigquery",
+    description := "Contributions to Scio's BigQuery tap",
+    libraryDependencies ++= Seq(
+      ScioBigQuery % Provided,
+      ScioAvro % Provided
+    ),
+    AvroConfig / version := avroVersion,
+    AvroConfig / sourceDirectory := baseDirectory.value / "src" / "test" / "avro",
+    Compile / sourceDirectories := (Compile / sourceDirectories).value
+      .filterNot(_.getPath.endsWith("/src_managed/main")),
+    Compile / managedSourceDirectories := (Compile / managedSourceDirectories).value
+      .filterNot(_.getPath.endsWith("/src_managed/main")),
+    Compile / doc / sources := List(), // suppress warnings
+    compileOrder := CompileOrder.JavaThenScala
+  )
 
 lazy val root: Project = project
   .in(file("."))
