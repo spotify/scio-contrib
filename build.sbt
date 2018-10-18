@@ -41,7 +41,10 @@ val commonSettings = Seq(
   libraryDependencies ++= Seq(
     ScioCore % Provided,
     ScioTest % Test
-  ),
+  )
+)
+
+lazy val publishSettings = Seq(
   publishTo := Some(if (isSnapshot.value) {
     Opts.resolver.sonatypeSnapshots
   } else {
@@ -56,30 +59,31 @@ val commonSettings = Seq(
   homepage := Some(url("https://github.com/spotify/scio-contrib")),
   scmInfo := Some(
     ScmInfo(url("https://github.com/spotify/scio-contrib.git"),
-            "scm:git:git@github.com:spotify/scio-contrib.git")),
+      "scm:git:git@github.com:spotify/scio-contrib.git")),
   developers := List(
     Developer(id = "sinisa_lyh",
-              name = "Neville Li",
-              email = "neville.lyh@gmail.com",
-              url = url("https://twitter.com/sinisa_lyh")),
+      name = "Neville Li",
+      email = "neville.lyh@gmail.com",
+      url = url("https://twitter.com/sinisa_lyh")),
     Developer(id = "clairemcginty",
-              name = "Claire McGinty",
-              email = "claire.d.mcginty@gmail.com",
-              url = url("https://github.com/clairemcginty")),
+      name = "Claire McGinty",
+      email = "claire.d.mcginty@gmail.com",
+      url = url("https://github.com/clairemcginty")),
     Developer(id = "regadas",
-              name = "Filipe Regadas",
-              email = "filiperegadas@gmail.com",
-              url = url("https://twitter.com/regadas")),
+      name = "Filipe Regadas",
+      email = "filiperegadas@gmail.com",
+      url = url("https://twitter.com/regadas")),
     Developer(id = "jto",
-              name = "Julien Tournay",
-              email = "julient@spotify.com",
-              url = url("https://twitter.com/skaalf"))
+      name = "Julien Tournay",
+      email = "julient@spotify.com",
+      url = url("https://twitter.com/skaalf"))
   )
 )
 
 lazy val scioContribBigQuery: Project = project
   .in(file("bigquery"))
   .settings(commonSettings)
+  .settings(publishSettings)
   .settings(
     name := "scio-contrib-bigquery",
     description := "Contributions to Scio's BigQuery tap",
