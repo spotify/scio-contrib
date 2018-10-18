@@ -36,7 +36,7 @@ trait ToTableRow {
   private lazy val base64Encoding: BaseEncoding = BaseEncoding.base64Url()
   private lazy val hexEncoding: BaseEncoding = BaseEncoding.base16()
 
-  def toTableRow[T <: IndexedRecord](record: T): TableRow = {
+  def toTableRow[T](record: T)(implicit ev: T <:< IndexedRecord): TableRow = {
     val row = new TableRow
 
     record.getSchema.getFields.asScala.foreach { field =>

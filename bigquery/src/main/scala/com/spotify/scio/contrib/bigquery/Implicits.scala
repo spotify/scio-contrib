@@ -17,6 +17,7 @@
 package com.spotify.scio.contrib.bigquery
 
 import com.google.api.services.bigquery.model.TableReference
+import com.spotify.scio.bigquery.BigQueryTable.WriteParam
 import com.spotify.scio.bigquery._
 import com.spotify.scio.io.Tap
 import com.spotify.scio.util.ScioUtil
@@ -31,12 +32,12 @@ import scala.reflect.ClassTag
 /** Provides implicit helpers for SCollections interacting with BigQuery. */
 object Implicits extends ToTableRow with ToTableSchema {
 
-  case class AvroConversionException(
+  final case class AvroConversionException(
     private val message: String,
     private val cause: Throwable = null
   ) extends Exception(message, cause)
 
-  implicit class AvroImplicits[T <: IndexedRecord](val self: SCollection[T]) {
+  implicit class AvroImplicits[T](val self: SCollection[T]) {
 
     /**
      * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
@@ -45,12 +46,13 @@ object Implicits extends ToTableRow with ToTableSchema {
      * [[org.apache.avro.generic.IndexedRecord IndexedRecord]] into a
      * [[com.spotify.scio.bigquery.TableRow TableRow]].
      */
-    def saveAvroAsBigQuery(
-      table: TableReference,
-      avroSchema: Schema = null,
-      writeDisposition: WriteDisposition = null,
-      createDisposition: CreateDisposition = null,
-      tableDescription: String = null)(implicit c: ClassTag[T]): Future[Tap[TableRow]] = {
+    def saveAvroAsBigQuery(table: TableReference,
+                           avroSchema: Schema = null,
+                           writeDisposition: WriteDisposition = null,
+                           createDisposition: CreateDisposition = null,
+                           tableDescription: String = null)(
+      implicit ev: T <:< IndexedRecord,
+      c: ClassTag[T]): Future[Tap[TableRow]] = {
       val schema: Schema = Option(avroSchema)
         .getOrElse {
           val cls = ScioUtil.classOf[T]
@@ -61,10 +63,11 @@ object Implicits extends ToTableRow with ToTableSchema {
           }
         }
 
-      val bqSchema = toTableSchema(schema)
+      val params =
+        WriteParam(toTableSchema(schema), writeDisposition, createDisposition, tableDescription)
       self
-        .map(toTableRow)
-        .saveAsBigQuery(table, bqSchema, writeDisposition, createDisposition, tableDescription)
+        .map(toTableRow(_))
+        .write(BigQueryTable(table))(params)
     }
   }
 
