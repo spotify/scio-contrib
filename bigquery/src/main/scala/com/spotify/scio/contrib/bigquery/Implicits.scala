@@ -37,7 +37,7 @@ object Implicits extends ToTableRow with ToTableSchema {
     private val cause: Throwable = null
   ) extends Exception(message, cause)
 
-  implicit class AvroImplicits[T](val self: SCollection[T]) {
+  implicit class AvroImplicits[T](private val self: SCollection[T]) {
 
     /**
      * Saves the provided SCollection[T] to BigQuery where T is a subtype of Indexed Record,
