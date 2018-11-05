@@ -1,7 +1,7 @@
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 addSbtPlugin("org.scalastyle" % "scalastyle-sbt-plugin" % "1.0.0")
 addSbtPlugin("com.cavorite" % "sbt-avro-1-8" % "1.1.4")
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.8")
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.10")
 addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "1.5.1")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.3")
