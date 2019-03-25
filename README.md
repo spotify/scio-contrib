@@ -1,3 +1,8 @@
+DEPRECATED
+==========
+
+Use the main [Scio](https://github.com/spotify/scio) repo instead.
+
 scio-contrib
 ===
 
